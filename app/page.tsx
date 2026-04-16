@@ -19,42 +19,40 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadApods() {
-      try {
-        setLoading(true);
-        setError(null);
+ useEffect(() => {
+   async function loadApods() {
+     try {
+       setError(null);
 
-        const cached = getCachedApods();
-        const savedVisited = getVisited();
+       const cached = getCachedApods();
+       const savedVisited = getVisited();
 
-        setVisited(savedVisited);
+       setVisited(savedVisited);
 
-        if (cached.length > 0) {
-          setApods(cached);
-          return;
-        }
+       if (cached.length > 0) {
+         setApods(cached);
+         return;
+       }
 
-        const data = await getRecentApods();
-        setApods(data);
-        setCachedApods(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
-      } finally {
-        setLoading(false);
-      }
-    }
+       const data = await getRecentApods();
+       setApods(data);
+       setCachedApods(data);
+     } catch (err) {
+       setError(err instanceof Error ? err.message : "Something went wrong");
+     } finally {
+       setLoading(false);
+     }
+   }
 
-    loadApods();
-  }, []);
-
+   loadApods();
+ }, []);
   const handleClearHistory = () => {
     clearVisited();
     setVisited([]);
   };
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 p-6 space-y-6">
+    <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">
           Astronomy Picture of the Day
@@ -75,6 +73,6 @@ export default function HomePage() {
       ) : (
         <ApodGrid apods={apods} visited={visited} />
       )}
-    </main>
+    </div>
   );
 }
