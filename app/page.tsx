@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import ApodGrid from "@/components/ApodGrid";
 import ClearHistoryButton from "@/components/ClearHistoryButton";
+import { ApodGridSkeleton } from "@/components/ApodGridSkeleton";
 import { getRecentApods } from "@/lib/api";
 import {
   clearVisited,
@@ -15,11 +16,13 @@ import type { Apod } from "@/types/apod";
 export default function HomePage() {
   const [apods, setApods] = useState<Apod[]>([]);
   const [visited, setVisited] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadApods() {
       try {
+        setLoading(true);
         setError(null);
 
         const cached = getCachedApods();
@@ -37,6 +40,8 @@ export default function HomePage() {
         setCachedApods(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong");
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -47,16 +52,6 @@ export default function HomePage() {
     clearVisited();
     setVisited([]);
   };
-
-  if (error) {
-    return (
-      <main className="p-6 min-h-screen bg-slate-950">
-        <div className="rounded-lg border border-red-200 bg-red-900 p-4 text-sm text-red-700">
-          Failed to load APODs: {error}
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100 p-6 space-y-6">
@@ -71,7 +66,15 @@ export default function HomePage() {
 
       <ClearHistoryButton onClear={handleClearHistory} />
 
-      <ApodGrid apods={apods} visited={visited} />
+      {error ? (
+        <div className="rounded-lg border border-red-200 bg-red-900 p-4 text-sm text-red-700">
+          Failed to load APODs: {error}
+        </div>
+      ) : loading ? (
+        <ApodGridSkeleton />
+      ) : (
+        <ApodGrid apods={apods} visited={visited} />
+      )}
     </main>
   );
 }
